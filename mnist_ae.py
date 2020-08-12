@@ -3,6 +3,7 @@ import torchvision as tv
 from tqdm import tqdm
 from torch import nn, optim, save, load
 import os
+import torch
 
 
 class ConvAE_1x28x28(nn.Module):
@@ -106,7 +107,6 @@ class LinearAE_28x28(nn.Module):
             print(f"Output: {z.shape}")
 
         return z
-
 
 class MNIST_AE():
     def __init__(self, data_dir, output_dir, batch_size=16, device='cpu'):
@@ -280,4 +280,28 @@ class MNIST_AE():
         self.loss.load_state_dict(hyperparams['loss'])
 
         return {'epoch': chkpt['epoch'], 'num_epoch': hyperparams['num_epoch']}
+
+    def eval_encoder(self, x):
+        """
+        Evaluate the encoder part of the model
+        """
+        self.model.eval()
+
+        y = x.to(self.device).view(x.shape[0], -1)
+        for enc in self.model.encoder:
+            y = enc(y)
+
+        return y
+
+    def eval_decoder(self, x):
+        """
+        Evaluate the decoder part of the model
+        """
+        self.model.eval()
+
+        y = x.to(self.device)
+        for dec in self.model.decoder:
+            y = dec(y)
+
+        return y
 
